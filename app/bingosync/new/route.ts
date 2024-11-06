@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
     method: 'POST',
     redirect: 'manual',
     headers: {
-      'Cookie': cookies!,
-      'Origin': bingosyncURL,
-      'Referer': bingosyncURL,
+      Cookie: cookies!,
+      Origin: bingosyncURL,
+      Referer: bingosyncURL,
     },
     body,
   })
