@@ -1,17 +1,8 @@
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export default function Home() {
-  return (
-    <div>
-      <h1>Super Metroid Multi-Category Tournament 2024</h1>
-      <ul>
-        <li>
-          <Link href="#">Standings</Link>
-        </li>
-        <li>
-          <Link href="https://sg-schedule.inertia.run/smmc">Schedule</Link>
-        </li>
-      </ul>
-    </div>
-  )
+  const slug = process.env.TOURNAMENT_SLUG
+  const inertiaUrl = process.env.INERTIA_URL
+  const tournamentUrl = new URL(`/tournaments/${slug}`, inertiaUrl)
+  return redirect(tournamentUrl.toString())
 }
