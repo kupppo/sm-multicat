@@ -8,7 +8,7 @@ type Metafield = {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { token: string; userId: string } },
+  { params }: { params: Promise<{ token: string; userId: string }> },
 ) {
   const { token, userId } = await params
   const inertiaUrl = process.env.INERTIA_URL

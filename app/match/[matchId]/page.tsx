@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 export default async function MatchPage({
   params,
 }: {
-  params: { matchId: string }
+  params: Promise<{ matchId: string }>
 }) {
   const { matchId } = await params
 
