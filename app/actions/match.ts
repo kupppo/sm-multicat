@@ -81,3 +81,38 @@ export const setRaceMode = async (
   })
   return true
 }
+
+export const setHigherSeed = async (playerId: string, matchId: string) => {
+  const url = `/api/metafields`
+  try {
+    await InertiaAPI(url, {
+      method: 'POST',
+      payload: {
+        model: 'match',
+        modelId: matchId,
+        key: 'higher_seed',
+        value: playerId,
+      },
+    })
+  } catch (err) {
+    await InertiaAPI(url, {
+      method: 'PUT',
+      payload: {
+        model: 'match',
+        modelId: matchId,
+        key: 'higher_seed',
+        value: playerId,
+      },
+    })
+  }
+  await InertiaAPI(url, {
+    method: 'PUT',
+    payload: {
+      model: 'match',
+      modelId: matchId,
+      key: 'status',
+      value: 'AWAITING_PLAYER_ASSIGNMENT',
+    },
+  })
+  return true
+}
