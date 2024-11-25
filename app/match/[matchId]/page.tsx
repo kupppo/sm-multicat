@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import RealtimeUpdates from './realtime'
 import { cookies } from 'next/headers'
+import InertiaAPI from '@/lib/inertia'
 
 export default async function MatchPage({
   params,
@@ -16,55 +17,34 @@ export default async function MatchPage({
     return notFound()
   }
 
-  const inertiaUrl = process.env.INERTIA_URL
-  const inertiaToken = process.env.INERTIA_TOKEN
   const tournamentSlug = process.env.TOURNAMENT_SLUG
-  const matchReq = await fetch(
-    `${inertiaUrl}/api/tournaments/${tournamentSlug}/matches/${matchId}`,
+  const match = await InertiaAPI(
+    `/api/tournaments/${tournamentSlug}/matches/${matchId}`,
     {
-      headers: {
-        authorization: `Bearer ${inertiaToken}`,
-      },
+      method: 'GET',
     },
   )
-  const match = await matchReq.json()
 
   if (!match) {
     return notFound()
   }
 
   const [userId, _token] = authCookie.value.split(':')
-  const userReq = await fetch(
-    `${inertiaUrl}/api/tournaments/${tournamentSlug}/users/${userId}`,
+  const user = await InertiaAPI(
+    `/api/tournaments/${tournamentSlug}/users/${userId}`,
     {
-      headers: {
-        Authorization: `Bearer ${inertiaToken}`,
-      },
+      method: 'GET',
     },
   )
 
-  if (!userReq) {
+  if (!user) {
     return notFound()
   }
-
-  const user = await userReq.json()
-
-  const statusMetafield = match.metafields.find((m: any) => m.key === 'status')
-  const higherSeed = match.metafields.find((m: any) => m.key === 'higher_seed')
-  const firstPlayer = match.metafields.find((m: any) => m.key === 'player_1')
-  const opponentId = match.racers.find((r: any) => r.id !== user.id).id
 
   return (
     <div>
       <h1>{match.races[0].name}</h1>
-      <RealtimeUpdates
-        matchId={matchId}
-        initialStatus={statusMetafield.value}
-        higherSeed={higherSeed?.value || null}
-        isFirstPlayer={firstPlayer?.value === user.id || null}
-        userId={user.id}
-        opponentId={opponentId}
-      />
+      <RealtimeUpdates matchId={matchId} {...match} />
     </div>
   )
 }
