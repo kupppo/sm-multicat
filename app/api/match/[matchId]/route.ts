@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { matchId: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ matchId: string }> },
 ) {
   const { matchId } = await params
   const cookieStore = await cookies()
