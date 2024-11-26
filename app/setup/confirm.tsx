@@ -12,7 +12,7 @@ export default function Confirmation({ id }: { id: string }) {
   >('idle')
 
   return (
-    <div className="h-10 relative">
+    <div className="h-40 relative">
       <p className="mb-8">
         Thank you for joining the tournament.
         <br />
