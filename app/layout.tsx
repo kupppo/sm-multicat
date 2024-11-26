@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Toaster } from 'sonner'
+import { ThemeProvider } from './theme-provider'
 import './globals.css'
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 
 export const metadata: Metadata = {
   title: 'Super Metroid Multi-Category Tournament',
@@ -13,10 +16,19 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`antialiased`}>
-        {children}
-        <Toaster />
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`antialiased min-h-screen ${GeistSans.variable} ${GeistMono.variable}`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
