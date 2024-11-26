@@ -6,10 +6,16 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { confirmParticipation } from '@/app/actions/setup'
 
-export default function Confirmation({ id }: { id: string }) {
+export default function Confirmation({
+  confirmed = false,
+  id,
+}: {
+  confirmed: boolean
+  id: string
+}) {
   const [state, setState] = useState<
     'idle' | 'submitting' | 'success' | 'error'
-  >('idle')
+  >(confirmed ? 'success' : 'idle')
 
   return (
     <div className="h-40 relative">

@@ -36,7 +36,10 @@ export default async function RunnerSetup() {
     return notFound()
   }
 
-  console.log(user)
+  const confirmedMetafield = user.metafields.find(
+    (metafield: any) => metafield.key === 'participation',
+  )
+  const alreadyConfirmed = confirmedMetafield?.value === 'confirmed'
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center w-full md:w-1/2 max-w-[500px] mx-auto px-4 text-center gap-y-8">
@@ -46,7 +49,7 @@ export default async function RunnerSetup() {
           <AnimatedNamePill name={user.name} />
         </div>
       </div>
-      <Confirmation id={user.id} />
+      <Confirmation id={user.id} confirmed={alreadyConfirmed} />
     </div>
   )
 }
