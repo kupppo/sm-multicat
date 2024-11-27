@@ -1,6 +1,7 @@
 import { Webhook } from 'svix'
+import { inngest } from '@/inngest/client'
 
-const webhookSecret: string = process.env.WEBHOOK_SECRET!
+const webhookSecret: string = process.env.SIGNING_SECRET!
 
 export async function POST(req: Request) {
   const svix_id = req.headers.get('svix-id') ?? ''
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
 
   const sivx = new Webhook(webhookSecret)
 
-  let msg
+  let msg: any
 
   try {
     msg = sivx.verify(body, {
@@ -23,9 +24,30 @@ export async function POST(req: Request) {
     return new Response('Bad Request', { status: 400 })
   }
 
-  console.log(msg)
-
-  // Rest
+  switch (msg.event) {
+    case 'race.setting_up':
+      await inngest.send({
+        name: 'race/initiate',
+        data: {
+          matchId: msg.match_id,
+          racetimeUrl: msg.racetime_url,
+          raceId: msg.race_id,
+        },
+      })
+      break
+    case 'race.ended':
+      await inngest.send({
+        name: 'race/end',
+        data: {
+          matchId: msg.match_id,
+          racetimeUrl: msg.racetime_url,
+          raceId: msg.race_id,
+        },
+      })
+      break
+    default:
+      throw Error(`Unknown event: ${msg.event}`)
+  }
 
   return new Response('OK', { status: 200 })
 }

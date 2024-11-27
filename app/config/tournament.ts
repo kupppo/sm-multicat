@@ -62,4 +62,8 @@ export const MatchStates = [
     slug: 'PLAYING_RACE_2',
     name: 'Playing Race 2',
   },
+  {
+    slug: 'PLAYING_RACE_3',
+    name: 'Playing Race 3',
+  },
 ]
