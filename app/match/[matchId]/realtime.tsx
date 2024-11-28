@@ -12,6 +12,7 @@ import useSWR from 'swr'
 import { cn } from '@/lib/utils'
 import { CardContent, CardFooter } from '@/components/ui/card'
 import { LoadingDots } from '@/components/loading-dots'
+import { inngest } from '@/inngest/client'
 
 const PlayerAssignment = ({
   higherSeed,
@@ -156,6 +157,13 @@ const PlayerPick = (props: any) => {
     try {
       const pickKey = `player_${props.isFirstPlayer ? '1' : '2'}_pick`
       await setRaceMode(pickValue, props.matchId, pickKey)
+      await inngest.send({
+        name: 'race/mode.select',
+        data: {
+          mode: pickValue,
+          racetimeUrl: props.currentRacetimeUrl,
+        },
+      })
       toast.success('Pick set', { id: toastId })
       const evt = new CustomEvent('live:update', {
         detail: { eventName: `match:${pickKey}` },

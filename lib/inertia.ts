@@ -45,6 +45,8 @@ export const parseMatchData = (match: any, userId: string) => {
     match.metafields.find((m: any) => m.key === 'player_1')?.value || null
   const isFirstPlayer = firstPlayer === userId || false
   const opponentId = match.racers.find((r: any) => r.id !== userId).id
+  const lastActiveRace = match.races.filter((race: any) => race.status === 'SETTING_UP').at(-1)
+  const currentRacetimeUrl = lastActiveRace?.externalUrl || null
 
   return {
     matchId: match.id,
@@ -72,5 +74,6 @@ export const parseMatchData = (match: any, userId: string) => {
       [match.racers[0].id]: match.racers[0].user.name,
       [match.racers[1].id]: match.racers[1].user.name,
     },
+    currentRacetimeUrl,
   }
 }

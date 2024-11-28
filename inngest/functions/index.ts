@@ -1,11 +1,17 @@
 import InertiaAPI from '@/lib/inertia'
 import { inngest } from '../client'
 import { NonRetriableError } from 'inngest'
+import { RaceModes } from '@/app/config/tournament'
 
 type RaceEventData = {
   matchId: string
   raceId: string
   racetimeUrl: string
+}
+
+type RaceModeEventData = {
+  racetimeUrl: string
+  mode: string
 }
 
 export const handleRaceStart = inngest.createFunction(
@@ -126,6 +132,28 @@ export const handleRaceEnd = inngest.createFunction(
           value: newState,
           model: 'match',
           modelId: data.matchId,
+        },
+      })
+    })
+  },
+)
+
+export const handleModeSelection = inngest.createFunction(
+  { id: 'handle-mode-selection' },
+  { event: 'race/mode.select' },
+  async ({ event, step }) => {
+    const data = event.data as RaceModeEventData
+    await step.run('set-mode-on-racetime', async () => {
+      const mode = RaceModes.find((mode) => mode.slug === data.mode)
+      if (!mode) {
+        throw new NonRetriableError(`Mode not found: ${data.mode}`)
+      }
+
+      await InertiaAPI('/api/racetime/race', {
+        method: 'PUT',
+        payload: {
+          roomUrl: data.racetimeUrl,
+          goal: mode.slug,
         },
       })
     })
