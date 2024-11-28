@@ -1,6 +1,7 @@
 'use server'
 
 import InertiaAPI from '@/lib/inertia'
+import { inngest } from '@/inngest/client'
 
 export const setFirstPlayer = async (playerId: string, matchId: string) => {
   const url = `/api/metafields`
