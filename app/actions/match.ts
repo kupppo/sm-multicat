@@ -57,6 +57,7 @@ export const setRaceMode = async (
   modeId: string,
   matchId: string,
   key: string,
+  racetimeUrl: string,
 ) => {
   const newStatus =
     key === 'player_2_pick' ? 'PLAYING_RACE_1' : 'PLAYING_RACE_2'
@@ -77,6 +78,13 @@ export const setRaceMode = async (
       modelId: matchId,
       key: 'status',
       value: newStatus,
+    },
+  })
+  await inngest.send({
+    name: 'race/mode.select',
+    data: {
+      mode: modeId,
+      racetimeUrl: racetimeUrl,
     },
   })
   return true
