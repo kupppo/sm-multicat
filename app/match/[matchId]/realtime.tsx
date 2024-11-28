@@ -10,6 +10,8 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { cn } from '@/lib/utils'
+import { CardContent, CardFooter } from '@/components/ui/card'
+import { LoadingDots } from '@/components/loading-dots'
 
 const PlayerAssignment = ({
   higherSeed,
@@ -38,17 +40,23 @@ const PlayerAssignment = ({
   }
   const isHigherSeed = higherSeed === userId || false
   return (
-    <div>
-      <h3>Player Assignment</h3>
+    <div className="w-full">
       {isHigherSeed ? (
         <div>
-          <p>You need to pick if to be player 1 or 2.</p>
-          <Button onClick={() => handleSubmit(userId)}>Player 1</Button>
-          <Button onClick={() => handleSubmit(opponentId)}>Player 2</Button>
+          <p className="text-center">
+            You need to pick if to be player 1 or 2.
+          </p>
+          <div className="flex gap-2 justify-center mt-4">
+            <Button onClick={() => handleSubmit(userId)}>Player 1</Button>
+            <Button onClick={() => handleSubmit(opponentId)}>Player 2</Button>
+          </div>
         </div>
       ) : (
-        <div>
-          <p>Waiting for the other player to pick...</p>
+        <div className="text-center">
+          <LoadingDots />
+          <p className="mt-4">
+            Waiting for the higher seed to pick player order
+          </p>
         </div>
       )}
     </div>
@@ -57,7 +65,7 @@ const PlayerAssignment = ({
 
 const AwaitingSeed = () => {
   return (
-    <div>
+    <div className="w-full">
       <h3>Awaiting Seed</h3>
     </div>
   )
@@ -84,11 +92,11 @@ const PlayerVeto = (props: any) => {
   const disabled = disabledModes(props)
 
   const handleSubmit = async (vetoValue: string) => {
-    const toastId = toast('Setting pick...')
+    const toastId = toast('Setting veto...')
     try {
       const vetoKey = `player_${props.isFirstPlayer ? '1' : '2'}_veto`
       await setVetoMode(vetoValue, props.matchId, vetoKey)
-      toast.success('Pick set', { id: toastId })
+      toast.success('Veto set', { id: toastId })
       const evt = new CustomEvent('live:update', {
         detail: { eventName: `match:${vetoKey}` },
       })
@@ -99,12 +107,11 @@ const PlayerVeto = (props: any) => {
     }
   }
   return (
-    <div>
-      <h3>Player Veto</h3>
+    <div className="w-full">
       {picker ? (
         <>
-          <p>Available Modes:</p>
-          <ul className="flex flex-col max-w-[200px] gap-2">
+          <p className="text-center w-full mb-4">Select a mode to veto</p>
+          <ul className="grid grid-cols-2 gap-2">
             {RaceModes.map((mode) => (
               <li key={mode.slug} className="w-full">
                 <Button
@@ -123,7 +130,12 @@ const PlayerVeto = (props: any) => {
           </ul>
         </>
       ) : (
-        <p>Waiting for the other player to pick...</p>
+        <div className="w-full">
+          <LoadingDots />
+          <p className="text-center mt-4">
+            Waiting for the other player to pick
+          </p>
+        </div>
       )}
     </div>
   )
@@ -157,16 +169,15 @@ const PlayerPick = (props: any) => {
     }
   }
   return (
-    <div>
-      <h3>Player Pick</h3>
+    <div className="w-full">
       {picker ? (
         <>
-          <p>Available Modes:</p>
-          <ul className="flex flex-col max-w-[200px] gap-2">
+          <p className="text-center w-full mb-4">Select a mode to play</p>
+          <ul className="grid grid-cols-2 gap-2">
             {RaceModes.map((mode) => (
               <li key={mode.slug} className="w-full">
                 <Button
-                  variant="default"
+                  variant={disabled.includes(mode.slug) ? 'outline' : 'default'}
                   className={cn(
                     'w-full block',
                     disabled.includes(mode.slug) && 'line-through',
@@ -181,7 +192,12 @@ const PlayerPick = (props: any) => {
           </ul>
         </>
       ) : (
-        <p>Waiting for the other player to pick...</p>
+        <div className="w-full">
+          <LoadingDots />
+          <p className="text-center mt-4">
+            Waiting for the other player to pick
+          </p>
+        </div>
       )}
     </div>
   )
@@ -189,7 +205,18 @@ const PlayerPick = (props: any) => {
 
 const Race = (props: any) => {
   const raceNum = props.status.split('_')[2]
-  return <p>Playing Race {raceNum}</p>
+  return (
+    <div className="w-full">
+      <LoadingDots />
+      <p className="text-center mt-4">
+        <span className="font-semibold">
+          Race #{raceNum} will begin shortly.
+        </span>
+        <br />
+        You can now go back to the Racetime room.
+      </p>
+    </div>
+  )
 }
 
 const getState = (status: string, props: any) => {
@@ -217,17 +244,42 @@ async function fetcher(key: string) {
   return res.json()
 }
 
-const getMode = (slug: string) => {
+const getMode = (slug: string, placeholder?: string) => {
   try {
     const mode = RaceModes.find((mode) => mode.slug === slug)
     if (!mode) {
+      if (placeholder) {
+        return <span className="italic text-foreground/20">{placeholder}</span>
+      }
       throw new Error('Mode not found')
     }
     return mode.name
   } catch (err) {
-    return '-'
+    return <span className="italic text-foreground/20">-</span>
   }
 }
+
+const SummaryItem = ({
+  label,
+  value,
+  active = false,
+}: {
+  label: string
+  value: string | React.ReactNode
+  active?: boolean
+}) => (
+  <li className="flex items-baseline px-0 md:px-4 rounded-full">
+    <div
+      className={cn(
+        'w-1/2 text-xs font-mono uppercase',
+        active ? 'text-foreground/80' : 'text-foreground/40',
+      )}
+    >
+      {label}
+    </div>
+    <div className="w-full">{value}</div>
+  </li>
+)
 
 export default function RealtimeUpdates({
   matchId,
@@ -268,7 +320,11 @@ export default function RealtimeUpdates({
   }, [mutate, router, socket])
 
   if (isLoading) {
-    return <div>is loading</div>
+    return (
+      <div className="h-20 flex justify-center items-center">
+        <LoadingDots />
+      </div>
+    )
   }
 
   const status = MatchStates.find((state) => state.slug === data.status)
@@ -276,33 +332,65 @@ export default function RealtimeUpdates({
     return null
   }
 
-  const firstPlayerName = data.racers[data.firstPlayer]
+  console.log(data)
+  console.log('firstPlayer', data.firstPlayer, data.racers[data.firstPlayer])
+
+  const firstPlayerName = data.racers[data.firstPlayer] || '—'
   const secondPlayer = Object.keys(data.racers).find(
-    (id: string) => id !== data.firstPlayer,
+    (id: string) => id !== data.firstPlayer && data.firstPlayer !== null,
   )
-  const secondPlayerName = data.racers[secondPlayer!]
+  const secondPlayerName = data.racers[secondPlayer!] || '—'
   const RenderedState = getState(status.slug, data)
 
   return (
     <div>
-      <ul>
-        <li>Match Status: {status?.name}</li>
-        {data.higherSeed && (
-          <li>Higher Seed: {data.racers[data.higherSeed]}</li>
-        )}
-        {data.firstPlayer && (
-          <>
-            <li>Player 1: {firstPlayerName}</li>
-            <li>Player 2: {secondPlayerName}</li>
-          </>
-        )}
-        <li>Player 1 Veto: {getMode(data.player1Veto)}</li>
-        <li>Player 2 Veto: {getMode(data.player2Veto)}</li>
-        <li>Game 1: {getMode(data.player2Pick)}</li>
-        <li>Game 2: {getMode(data.player1Pick)}</li>
-        <li>Game 3: {getMode(data.game3Mode)}</li>
-      </ul>
-      {RenderedState}
+      <CardContent>
+        <ul className="flex flex-col gap-y-2">
+          {data.higherSeed && (
+            <SummaryItem
+              label="Higher Seed"
+              value={data.racers[data.higherSeed]}
+            />
+          )}
+          <SummaryItem label="P1" value={firstPlayerName} />
+          <SummaryItem label="P2" value={secondPlayerName} />
+        </ul>
+        <ul className="flex flex-col gap-y-2 border-foreground/5 border-t-[1px] mt-2 pt-2">
+          <SummaryItem
+            label="P1 Veto"
+            value={getMode(data.player1Veto)}
+            active={data.status === 'PLAYER_1_VETO'}
+          />
+          <SummaryItem
+            label="P2 Veto"
+            value={getMode(data.player2Veto)}
+            active={data.status === 'PLAYER_2_VETO'}
+          />
+        </ul>
+        <ul className="flex flex-col gap-y-2 border-foreground/5 border-t-[1px] mt-2 pt-2">
+          <SummaryItem
+            label="Game 1"
+            value={getMode(
+              data.player2Pick,
+              `${secondPlayer ? secondPlayerName : 'P2'} Picks`,
+            )}
+            active={data.status === 'PLAYER_2_PICK'}
+          />
+          <SummaryItem
+            label="Game 2"
+            value={getMode(
+              data.player1Pick,
+              `${data.firstPlayer ? firstPlayerName : 'P1'} Picks`,
+            )}
+            active={data.status === 'PLAYER_1_PICK'}
+          />
+          <SummaryItem
+            label="Game 3"
+            value={getMode(data.game3Mode, 'Randomly Selected')}
+          />
+        </ul>
+      </CardContent>
+      <CardFooter>{RenderedState}</CardFooter>
     </div>
   )
 }
