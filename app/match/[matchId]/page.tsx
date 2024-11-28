@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import RealtimeUpdates from './realtime'
 import { cookies } from 'next/headers'
-import InertiaAPI from '@/lib/inertia'
+import InertiaAPI, { parseMatchData } from '@/lib/inertia'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function MatchPage({
@@ -42,6 +42,8 @@ export default async function MatchPage({
     return notFound()
   }
 
+  const initialData = parseMatchData(match, user)
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full mx-4 md:mx-0 md:w-1/2 max-w-[480px]">
@@ -50,7 +52,7 @@ export default async function MatchPage({
             <h1>{match.races[0].name}</h1>
           </CardTitle>
         </CardHeader>
-        <RealtimeUpdates matchId={matchId} {...match} />
+        <RealtimeUpdates {...initialData} />
       </Card>
     </div>
   )

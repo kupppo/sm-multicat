@@ -83,7 +83,6 @@ const PlayerVeto = (props: any) => {
   const { firstPlayer, status, userId } = props
   let picker = false
   if (status === 'PLAYER_1_VETO' && firstPlayer === userId) {
-    console.log(picker)
     picker = true
   } else if (status === 'PLAYER_2_VETO' && firstPlayer !== userId) {
     picker = true
@@ -145,7 +144,6 @@ const PlayerPick = (props: any) => {
   const { firstPlayer, status, userId } = props
   let picker = false
   if (status === 'PLAYER_1_PICK' && firstPlayer === userId) {
-    console.log(picker)
     picker = true
   } else if (status === 'PLAYER_2_PICK' && firstPlayer !== userId) {
     picker = true
@@ -288,7 +286,7 @@ export default function RealtimeUpdates({
   matchId: string
 }) {
   const router = useRouter()
-  const { data, isLoading, mutate } = useSWR(`/api/match/${matchId}`, fetcher, {
+  const { data, mutate } = useSWR(`/api/match/${matchId}`, fetcher, {
     fallbackData,
   })
   const socket = usePartySocket({
@@ -319,21 +317,10 @@ export default function RealtimeUpdates({
     }
   }, [mutate, router, socket])
 
-  if (isLoading) {
-    return (
-      <div className="h-20 flex justify-center items-center">
-        <LoadingDots />
-      </div>
-    )
-  }
-
   const status = MatchStates.find((state) => state.slug === data.status)
   if (!status) {
     return null
   }
-
-  console.log(data)
-  console.log('firstPlayer', data.firstPlayer, data.racers[data.firstPlayer])
 
   const firstPlayerName = data.racers[data.firstPlayer] || '—'
   const secondPlayer = Object.keys(data.racers).find(
@@ -355,7 +342,7 @@ export default function RealtimeUpdates({
           <SummaryItem label="P1" value={firstPlayerName} />
           <SummaryItem label="P2" value={secondPlayerName} />
         </ul>
-        <ul className="flex flex-col gap-y-2 border-foreground/5 border-t-[1px] mt-2 pt-2">
+        <ul className="flex flex-col gap-y-2 border-foreground/10 border-t-[1px] mt-2 pt-2">
           <SummaryItem
             label="P1 Veto"
             value={getMode(data.player1Veto)}
@@ -367,7 +354,7 @@ export default function RealtimeUpdates({
             active={data.status === 'PLAYER_2_VETO'}
           />
         </ul>
-        <ul className="flex flex-col gap-y-2 border-foreground/5 border-t-[1px] mt-2 pt-2">
+        <ul className="flex flex-col gap-y-2 border-foreground/10 border-t-[1px] mt-2 pt-2">
           <SummaryItem
             label="Game 1"
             value={getMode(
