@@ -37,8 +37,15 @@ export async function GET(
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
   }
 
+  // Expire cookie 6 months from now
+  const expiresAt = new Date(Date.now() + 6 * 30.44 * 24 * 60 * 60 * 1000)
+
   const cookieStore = await cookies()
-  cookieStore.set('inertia-auth', `${userId}:${token}`, {})
+  cookieStore.set('inertia-auth', `${userId}:${token}`, {
+    httpOnly: true,
+    secure: true,
+    expires: expiresAt,
+  })
 
   const redirectUrl = new URL('/setup', req.nextUrl.origin)
   return NextResponse.redirect(redirectUrl.toString())
