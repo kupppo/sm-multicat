@@ -1,6 +1,7 @@
 import InertiaAPI from '@/lib/inertia'
 import { inngest } from '../client'
 import { NonRetriableError } from 'inngest'
+import { RaceModes } from '@/app/config/tournament'
 
 type RaceEventData = {
   matchId: string
