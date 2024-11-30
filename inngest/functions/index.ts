@@ -9,6 +9,11 @@ type RaceEventData = {
   racetimeUrl: string
 }
 
+type RaceModeEventData = {
+  racetimeUrl: string
+  mode: string
+}
+
 export const handleRaceStart = inngest.createFunction(
   { id: 'handle-race-start' },
   { event: 'race/initiate' },
@@ -204,6 +209,28 @@ export const handleRaceEnd = inngest.createFunction(
           value: newState,
           model: 'match',
           modelId: data.matchId,
+        },
+      })
+    })
+  },
+)
+
+export const handleModeSelection = inngest.createFunction(
+  { id: 'handle-mode-selection' },
+  { event: 'race/mode.select' },
+  async ({ event, step }) => {
+    const data = event.data as RaceModeEventData
+    await step.run('set-mode-on-racetime', async () => {
+      const mode = RaceModes.find((mode) => mode.slug === data.mode)
+      if (!mode) {
+        throw new NonRetriableError(`Mode not found: ${data.mode}`)
+      }
+
+      await InertiaAPI('/api/racetime/race', {
+        method: 'PUT',
+        payload: {
+          roomUrl: data.racetimeUrl,
+          goal: mode.slug,
         },
       })
     })

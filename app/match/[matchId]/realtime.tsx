@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { MatchStates, RaceModes } from '@/app/config/tournament'
 import { setFirstPlayer, setRaceMode, setVetoMode } from '@/app/actions/match'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { cn } from '@/lib/utils'
 import { CardContent, CardFooter } from '@/components/ui/card'
@@ -155,7 +154,12 @@ const PlayerPick = (props: any) => {
     const toastId = toast('Setting pick...')
     try {
       const pickKey = `player_${props.isFirstPlayer ? '1' : '2'}_pick`
-      await setRaceMode(pickValue, props.matchId, pickKey)
+      await setRaceMode(
+        pickValue,
+        props.matchId,
+        pickKey,
+        props.currentRacetimeUrl,
+      )
       toast.success('Pick set', { id: toastId })
       const evt = new CustomEvent('live:update', {
         detail: { eventName: `match:${pickKey}` },
@@ -285,7 +289,6 @@ export default function RealtimeUpdates({
 }: {
   matchId: string
 }) {
-  const router = useRouter()
   const { data, mutate } = useSWR(`/api/match/${matchId}`, fetcher, {
     fallbackData,
   })
@@ -315,7 +318,7 @@ export default function RealtimeUpdates({
       document.removeEventListener('live:update', handleEvent)
       document.removeEventListener('refresh:update', handleRefresh)
     }
-  }, [mutate, router, socket])
+  }, [mutate, socket])
 
   const status = MatchStates.find((state) => state.slug === data.status)
   if (!status) {
