@@ -85,8 +85,48 @@ export const handleRaceStart = inngest.createFunction(
         })
       })
     } else {
-      // Assign random mode not already picked
-      // Broadcast changes to racetime room
+      await step.run('set-final-match', async () => {
+        // Assign random mode not already picked
+        // Broadcast changes to racetime room
+        const selectedKeys = [
+          'player_1_pick',
+          'player_2_pick',
+          'player_1_veto',
+          'player_2_veto',
+        ]
+        const selectedModes = match.metafields
+          .filter((metafield: any) => selectedKeys.includes(metafield.key))
+          .map((metafield: any) => metafield.slug)
+        const nonSelectedModes = RaceModes.filter(
+          (mode) => !selectedModes.includes(mode.slug),
+        )
+        const randomMode =
+          nonSelectedModes[Math.floor(Math.random() * nonSelectedModes.length)]
+        await InertiaAPI('/api/metafields', {
+          method: 'POST',
+          payload: {
+            key: 'game_3_mode',
+            value: randomMode.slug,
+            model: 'match',
+            modelId: data.matchId,
+          },
+        })
+        await inngest.send({
+          name: 'race/mode.select',
+          data: {
+            mode: randomMode.slug,
+            racetimeUrl: data.racetimeUrl,
+          },
+        })
+        const msg = `This race will be set to ${randomMode.name} shortly.`
+        await InertiaAPI('/api/racetime/race/msg', {
+          method: 'POST',
+          payload: {
+            msg: msg,
+            roomUrl: data.racetimeUrl,
+          },
+        })
+      })
     }
   },
 )
