@@ -75,6 +75,43 @@ export const handleRaceStart = inngest.createFunction(
         }
       })
 
+      const awaitScheduledTime = await step.run(
+        'await-scheduled-time',
+        async () => {
+          const race = match.races.find((race: any) => race.id === data.raceId)
+          if (!race) {
+            return null
+          }
+          if (race.scheduleOnFinish) {
+            return null
+          }
+          if (race.scheduledAt) {
+            try {
+              const scheduledTime = new Date(race.scheduledAt.getMinutes())
+              scheduledTime.setMinutes(scheduledTime.getMinutes() - 10)
+              return scheduledTime.toISOString()
+            } catch (err) {
+              return null
+            }
+          }
+          return null
+        },
+      )
+
+      if (awaitScheduledTime) {
+        await step.run('send-initial-message', async () => {
+          const msg = `The options for this race will be sent to this room 10 minutes prior to the scheduled time.`
+          await InertiaAPI('/api/racetime/race/msg', {
+            method: 'POST',
+            payload: {
+              msg: msg,
+              roomUrl: data.racetimeUrl,
+            },
+          })
+        })
+        await step.sleepUntil('wait-until-10m-prior', awaitScheduledTime)
+      }
+
       await step.run('send-msg', async () => {
         const msg = `Please visit ${matchUrl.toString()} to setup the options for this race`
         await InertiaAPI('/api/racetime/race/msg', {
