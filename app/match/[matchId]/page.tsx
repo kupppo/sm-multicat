@@ -11,12 +11,7 @@ export default async function MatchPage({
 }) {
   const { matchId } = await params
 
-  // check auth
-  const cookieStore = await cookies()
-  const authCookie = cookieStore.get('inertia-auth')
-  if (!authCookie) {
-    return notFound()
-  }
+  const isPlayer = false
 
   const tournamentSlug = process.env.TOURNAMENT_SLUG
   const match = await InertiaAPI(
@@ -30,19 +25,26 @@ export default async function MatchPage({
     return notFound()
   }
 
-  const [userId, _token] = authCookie.value.split(':')
-  const user = await InertiaAPI(
-    `/api/tournaments/${tournamentSlug}/users/${userId}`,
-    {
-      method: 'GET',
-    },
-  )
+  // check auth
+  const cookieStore = await cookies()
+  const authCookie = cookieStore.get('inertia-auth')
 
-  if (!user) {
-    return notFound()
+  let userId = null
+  if (authCookie) {
+    const [authUserId, _token] = authCookie.value.split(':')
+    const userReq = await InertiaAPI(
+      `/api/tournaments/${tournamentSlug}/users/${authUserId}`,
+      {
+        method: 'GET',
+      },
+    )
+    if (!userReq) {
+      return notFound()
+    }
+    userId = userReq.id
   }
 
-  const initialData = parseMatchData(match, user)
+  const initialData = parseMatchData(match, userId)
 
   return (
     <div className="flex items-center justify-center min-h-screen">

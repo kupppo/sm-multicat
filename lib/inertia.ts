@@ -22,7 +22,7 @@ export default async function InertiaAPI(
   return data
 }
 
-export async function getMatch(matchId: string, userId: string) {
+export async function getMatch(matchId: string, userId: string | null) {
   const tournamentSlug = process.env.TOURNAMENT_SLUG
   const match = await InertiaAPI(
     `/api/tournaments/${tournamentSlug}/matches/${matchId}`,
@@ -37,7 +37,7 @@ export async function getMatch(matchId: string, userId: string) {
   return parseMatchData(match, userId)
 }
 
-export const parseMatchData = (match: any, userId: string) => {
+export const parseMatchData = (match: any, userId: string | null) => {
   const statusMetafield = match.metafields.find((m: any) => m.key === 'status')
   const higherSeed =
     match.metafields.find((m: any) => m.key === 'higher_seed')?.value || null
@@ -54,6 +54,7 @@ export const parseMatchData = (match: any, userId: string) => {
     status: statusMetafield.value,
     higherSeed,
     firstPlayer,
+    isPlayer: userId !== null,
     isFirstPlayer,
     opponentId,
     player1Veto:

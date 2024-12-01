@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils'
 import { CardContent, CardFooter } from '@/components/ui/card'
 import { LoadingDots } from '@/components/loading-dots'
 
+const Pending = () => <span className="italic text-foreground/20">-</span>
+
 const PlayerAssignment = ({
   higherSeed,
   opponentId,
@@ -209,13 +211,17 @@ const Race = (props: any) => {
   const raceNum = props.status.split('_')[2]
   return (
     <div className="w-full">
-      <LoadingDots />
+      {props.isPlayer && <LoadingDots />}
       <p className="text-center mt-4">
         <span className="font-semibold">
           Race #{raceNum} will begin shortly.
         </span>
-        <br />
-        You can now go back to the Racetime room.
+        {props.isPlayer && (
+          <>
+            <br />
+            You can now go back to the Racetime room.
+          </>
+        )}
       </p>
     </div>
   )
@@ -241,6 +247,41 @@ const getState = (status: string, props: any) => {
   }
 }
 
+const getViewerState = (status: string, props: any) => {
+  switch (status) {
+    case 'AWAITING_SEED':
+      return (
+        <p className="text-center block w-full">
+          Awaiting for the higher seed to be picked
+        </p>
+      )
+    case 'AWAITING_PLAYER_ASSIGNMENT':
+      const higherPlayer = props.racers[props.higherSeed]
+      return (
+        <p className="text-center block w-full">
+          {higherPlayer} will select to be Player 1 or 2
+        </p>
+      )
+    case 'PLAYER_1_VETO':
+    case 'PLAYER_2_VETO':
+      return (
+        <p className="text-center block w-full">
+          The players are now making their vetoes
+        </p>
+      )
+    case 'PLAYER_1_PICK':
+    case 'PLAYER_2_PICK':
+      return (
+        <p className="text-center block w-full">
+          The players are now making their picks
+        </p>
+      )
+    case 'PLAYING_RACE_1':
+    case 'PLAYING_RACE_2':
+      return <Race {...props} />
+  }
+}
+
 async function fetcher(key: string) {
   const res = await fetch(key)
   return res.json()
@@ -257,7 +298,7 @@ const getMode = (slug: string, placeholder?: string) => {
     }
     return mode.name
   } catch (err) {
-    return <span className="italic text-foreground/20">-</span>
+    return <Pending />
   }
 }
 
@@ -325,12 +366,14 @@ export default function RealtimeUpdates({
     return null
   }
 
-  const firstPlayerName = data.racers[data.firstPlayer] || '—'
+  const firstPlayerName = data.racers[data.firstPlayer] || <Pending />
   const secondPlayer = Object.keys(data.racers).find(
     (id: string) => id !== data.firstPlayer && data.firstPlayer !== null,
   )
-  const secondPlayerName = data.racers[secondPlayer!] || '—'
-  const RenderedState = getState(status.slug, data)
+  const secondPlayerName = data.racers[secondPlayer!] || <Pending />
+  const RenderedState = data.isPlayer
+    ? getState(status.slug, data)
+    : getViewerState(status.slug, data)
 
   return (
     <div>
