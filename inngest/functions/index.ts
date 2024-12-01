@@ -92,7 +92,7 @@ export const handleRaceStart = inngest.createFunction(
           }
           if (race.scheduledAt) {
             try {
-              const scheduledTime = new Date(race.scheduledAt.getMinutes())
+              const scheduledTime = new Date(race.scheduledAt)
               scheduledTime.setMinutes(scheduledTime.getMinutes() - 10)
               return scheduledTime.toISOString()
             } catch (err) {
