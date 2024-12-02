@@ -242,6 +242,8 @@ const getState = (status: string, props: any) => {
     case 'PLAYING_RACE_1':
     case 'PLAYING_RACE_2':
       return <Race {...props} />
+    case 'PLAYING_RACE_3':
+      return null
     default:
       return <div>Unknown State: {status}</div>
   }
@@ -279,6 +281,8 @@ const getViewerState = (status: string, props: any) => {
     case 'PLAYING_RACE_1':
     case 'PLAYING_RACE_2':
       return <Race {...props} />
+    case 'PLAYING_RACE_3':
+      return null
   }
 }
 
