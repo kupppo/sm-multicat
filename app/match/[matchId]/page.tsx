@@ -32,6 +32,7 @@ export default async function MatchPage({
   const authCookie = cookieStore.get('inertia-auth')
 
   let userId = null
+  let userName = null
   if (authCookie) {
     const [authUserId, _token] = authCookie.value.split(':')
     const userReq = await InertiaAPI(
@@ -44,11 +45,12 @@ export default async function MatchPage({
       return notFound()
     }
     userId = userReq.id
+    userName = userReq.name
   }
 
   const initialData = parseMatchData(match, userId)
   const returnUrl = `/match/${matchId}`
-  const loginUrl = `/login?returnUrl=${returnUrl}`
+  const loginUrl = `/login?returnTo=${returnUrl}`
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative">
@@ -60,13 +62,23 @@ export default async function MatchPage({
         </CardHeader>
         <RealtimeUpdates {...initialData} />
       </Card>
-      {!authCookie && (
+      {!authCookie ? (
         <div className="text-center w-full h-0 overflow-visible relative top-4">
           <Button asChild variant="ghost" size="sm" className="text-primary/40">
             <Link href={loginUrl} prefetch={false}>
               Login
             </Link>
           </Button>
+        </div>
+      ) : (
+        <div className="text-center w-full h-0 overflow-visible relative top-4 text-foreground/60 text-xs">
+          <Link
+            href={loginUrl}
+            prefetch={false}
+            className="underline underline-offset-4 text-foreground/40 hover:text-foreground transition-colors"
+          >
+            Logged in as {userName}
+          </Link>
         </div>
       )}
     </div>
