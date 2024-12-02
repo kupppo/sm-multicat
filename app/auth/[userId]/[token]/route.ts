@@ -47,6 +47,12 @@ export async function GET(
     expires: expiresAt,
   })
 
+  const returnTo = req.nextUrl.searchParams.get('returnTo')
+  if (returnTo) {
+    const returnUrl = new URL(returnTo, req.nextUrl.origin)
+    return NextResponse.redirect(returnUrl.toString())
+  }
+
   const redirectUrl = new URL('/setup', req.nextUrl.origin)
   return NextResponse.redirect(redirectUrl.toString())
 }
