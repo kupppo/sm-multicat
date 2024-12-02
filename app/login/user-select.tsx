@@ -105,7 +105,12 @@ export default function UserSelect({ users = [] }: { users: any[] }) {
       <h1 className="text-2xl mb-4">Send Login Link</h1>
       <Command
         className="rounded-lg border shadow-md md:min-w-[450px] outline-none"
-        filter={(_value: string, search: string, keywords: string[]) => {
+        filter={(
+          _value: string,
+          search: string,
+          keywords: string[] | undefined,
+        ) => {
+          if (!keywords) return 0
           const extendValue = keywords.join(' ')
           if (extendValue.includes(search)) return 1
           return 0
