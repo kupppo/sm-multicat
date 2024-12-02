@@ -15,7 +15,6 @@ import { AnimatedNamePill } from '../setup/username'
 import { cn } from '@/lib/utils'
 import { sendLoginLink } from '../actions/setup'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
 
 export default function UserSelect({ users = [] }: { users: any[] }) {
   const searchParams = useSearchParams()
@@ -42,63 +41,61 @@ export default function UserSelect({ users = [] }: { users: any[] }) {
 
     return (
       <div className="min-h-[350px]">
-        <Suspense fallback={null}>
-          <h1 className="text-2xl mb-8">Send Login Link</h1>
-          <div className="flex flex-col gap-y-8">
-            <div className="flex flex-col">
-              <div className="w-auto mx-auto">
-                <AnimatedNamePill name={userData.name} />
-              </div>
-              <div className={cn('w-auto mx-auto', isDisabled && 'invisible')}>
-                <Button
-                  variant="ghost"
-                  className="leading-none opacity-40"
-                  size="sm"
-                  onClick={() => setSelectedUser(null)}
-                >
-                  Cancel
-                </Button>
-              </div>
+        <h1 className="text-2xl mb-8">Send Login Link</h1>
+        <div className="flex flex-col gap-y-8">
+          <div className="flex flex-col">
+            <div className="w-auto mx-auto">
+              <AnimatedNamePill name={userData.name} />
             </div>
-            <div>
+            <div className={cn('w-auto mx-auto', isDisabled && 'invisible')}>
               <Button
-                disabled={isDisabled}
-                onClick={() => handleSubmit(selectedUser)}
+                variant="ghost"
+                className="leading-none opacity-40"
+                size="sm"
+                onClick={() => setSelectedUser(null)}
               >
-                <span>
-                  {(state === 'idle' || state === 'error') && 'Send login link'}
-                  {state === 'submitting' && (
-                    <div className="relative">
-                      <span className="invisible">Send login link</span>
-                      <div className="w-full h-full flex absolute top-0 left-0 justify-center">
-                        <LoaderCircle className="animate-spin w-2 h-2" />
-                      </div>
-                    </div>
-                  )}
-                  {state === 'success' && 'Login link sent'}
-                </span>
+                Cancel
               </Button>
-              <p className="mt-8 text-sm text-center max-w-[300px] mx-auto">
-                {state === 'idle' && (
-                  <>
-                    This will send a DM to you from{' '}
-                    <span className="font-semibold">Inertia</span> on Discord with
-                    a link to login.
-                  </>
-                )}
-                {state === 'submitting' && <>Sending login link...</>}
-                {state === 'success' && (
-                  <>Please check your DMs for the login link sent.</>
-                )}
-              </p>
-              {state === 'error' && (
-                <p className="mt-8 text-sm text-center max-w-[300px] mx-auto text-red-700">
-                  An error occured. Please try again.
-                </p>
-              )}
             </div>
           </div>
-        </Suspense>
+          <div>
+            <Button
+              disabled={isDisabled}
+              onClick={() => handleSubmit(selectedUser)}
+            >
+              <span>
+                {(state === 'idle' || state === 'error') && 'Send login link'}
+                {state === 'submitting' && (
+                  <div className="relative">
+                    <span className="invisible">Send login link</span>
+                    <div className="w-full h-full flex absolute top-0 left-0 justify-center">
+                      <LoaderCircle className="animate-spin w-2 h-2" />
+                    </div>
+                  </div>
+                )}
+                {state === 'success' && 'Login link sent'}
+              </span>
+            </Button>
+            <p className="mt-8 text-sm text-center max-w-[300px] mx-auto">
+              {state === 'idle' && (
+                <>
+                  This will send a DM to you from{' '}
+                  <span className="font-semibold">Inertia</span> on Discord with
+                  a link to login.
+                </>
+              )}
+              {state === 'submitting' && <>Sending login link...</>}
+              {state === 'success' && (
+                <>Please check your DMs for the login link sent.</>
+              )}
+            </p>
+            {state === 'error' && (
+              <p className="mt-8 text-sm text-center max-w-[300px] mx-auto text-red-700">
+                An error occured. Please try again.
+              </p>
+            )}
+          </div>
+        </div>
       </div>
     )
   }
