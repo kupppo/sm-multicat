@@ -139,7 +139,7 @@ export const handleRaceStart = inngest.createFunction(
         ]
         const selectedModes = match.metafields
           .filter((metafield: any) => selectedKeys.includes(metafield.key))
-          .map((metafield: any) => metafield.slug)
+          .map((metafield: any) => metafield.value)
         const nonSelectedModes = RaceModes.filter(
           (mode) => !selectedModes.includes(mode.slug),
         )
@@ -158,7 +158,7 @@ export const handleRaceStart = inngest.createFunction(
           name: 'race/mode.select',
           data: {
             mode: randomMode.slug,
-            racetimeUrl: data.racetimeUrl,
+            roomUrl: data.racetimeUrl,
           },
         })
         const msg = `This race will be set to ${randomMode.name} shortly.`
