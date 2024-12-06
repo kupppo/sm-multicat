@@ -39,7 +39,7 @@ export const handleRaceStart = inngest.createFunction(
       return entry
     })
 
-    // Determine if third race or not
+    // Determine if last race or not
     const lastRace = await step.run('determine-race-number', async () => {
       const race = match.races.find((race: any) => race.id === data.raceId)
       if (!race) {
@@ -48,7 +48,6 @@ export const handleRaceStart = inngest.createFunction(
 
       const raceNumber = race.ordering
       if (raceNumber === 2) {
-        // roll random seed
         return true
       }
 
@@ -145,6 +144,8 @@ export const handleRaceStart = inngest.createFunction(
         )
         const randomMode =
           nonSelectedModes[Math.floor(Math.random() * nonSelectedModes.length)]
+
+        // Set mode in Inertia
         await InertiaAPI('/api/metafields', {
           method: 'POST',
           payload: {
@@ -154,6 +155,8 @@ export const handleRaceStart = inngest.createFunction(
             modelId: data.matchId,
           },
         })
+
+        // Set mode in Racetime
         await inngest.send({
           name: 'race/mode.select',
           data: {
@@ -162,6 +165,8 @@ export const handleRaceStart = inngest.createFunction(
           },
         })
         const msg = `This race will be set to ${randomMode.name} shortly.`
+
+        // Send message to racetime
         await InertiaAPI('/api/racetime/race/msg', {
           method: 'POST',
           payload: {
@@ -169,49 +174,19 @@ export const handleRaceStart = inngest.createFunction(
             roomUrl: data.racetimeUrl,
           },
         })
+
+        // Progress match
+        await InertiaAPI('/api/metafields', {
+          method: 'PUT',
+          payload: {
+            key: 'status',
+            value: 'PLAYING_RACE_3',
+            model: 'match',
+            modelId: data.matchId,
+          },
+        })
       })
     }
-  },
-)
-
-export const handleRaceEnd = inngest.createFunction(
-  { id: 'handle-race-end' },
-  { event: 'race/end' },
-  async ({ event, step }) => {
-    const data = event.data as RaceEventData
-    await step.run('progress-match', async () => {
-      const tournamentSlug = process.env.TOURNAMENT_SLUG!
-      const match = await InertiaAPI(
-        `/api/tournaments/${tournamentSlug}/matches/${data.matchId}`,
-        {
-          method: 'GET',
-        },
-      )
-      if (!match) {
-        throw new NonRetriableError('Match not found')
-      }
-
-      const matchState = match.metafields.find(
-        (metafield: any) => metafield.key === 'status',
-      )
-      if (!matchState) {
-        throw new NonRetriableError('Match Metafield not found')
-      }
-
-      let newState = 'PLAYER_1_PICK'
-      if (matchState.value === 'PLAYING_RACE_2') {
-        newState = 'PLAYING_RACE_3'
-      }
-      const update = await InertiaAPI('/api/metafields', {
-        method: 'PUT',
-        payload: {
-          key: 'status',
-          value: newState,
-          model: 'match',
-          modelId: data.matchId,
-        },
-      })
-    })
   },
 )
 

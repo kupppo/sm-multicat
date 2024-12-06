@@ -35,16 +35,6 @@ export async function POST(req: Request) {
         },
       })
       break
-    case 'race.ended':
-      await inngest.send({
-        name: 'race/end',
-        data: {
-          matchId: msg.match_id,
-          racetimeUrl: msg.racetime_url,
-          raceId: msg.race_id,
-        },
-      })
-      break
     default:
       throw Error(`Unknown event: ${msg.event}`)
   }
