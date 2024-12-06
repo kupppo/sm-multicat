@@ -162,7 +162,7 @@ export const handleRaceStart = inngest.createFunction(
           name: 'race/mode.select',
           data: {
             mode: randomMode.slug,
-            roomUrl: data.racetimeUrl,
+            racetimeUrl: data.racetimeUrl,
           },
         })
         const msg = `This race will be set to ${randomMode.name} shortly.`
