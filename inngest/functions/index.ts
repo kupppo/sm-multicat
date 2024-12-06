@@ -1,5 +1,6 @@
 import InertiaAPI from '@/lib/inertia'
 import { inngest } from '../client'
+import { send as inngestSend } from '@/lib/inngest'
 import { NonRetriableError } from 'inngest'
 import { RaceModes } from '@/app/config/tournament'
 
@@ -157,7 +158,7 @@ export const handleRaceStart = inngest.createFunction(
         })
 
         // Set mode in Racetime
-        await inngest.send({
+        await inngestSend({
           name: 'race/mode.select',
           data: {
             mode: randomMode.slug,
@@ -185,6 +186,7 @@ export const handleRaceStart = inngest.createFunction(
             modelId: data.matchId,
           },
         })
+        return randomMode.slug
       })
     }
   },
