@@ -198,7 +198,8 @@ export const handleRaceScheduled = inngest.createFunction(
   async ({ event, step }) => {
     const data = event.data as RaceEventData
     await step.run('setup-match', async () => {
-      const match = await InertiaAPI(`/api/matches/${data.matchId}`, {
+      const tournamentSlug = process.env.TOURNAMENT_SLUG!
+      const match = await InertiaAPI(`/api/tournaments/${tournamentSlug}/matches/${data.matchId}`, {
         method: 'GET',
       })
       if (!match) {
