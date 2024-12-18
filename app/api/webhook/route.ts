@@ -35,6 +35,17 @@ export async function POST(req: Request) {
         },
       })
       break
+    case 'race.scheduled':
+      // TODO: Get race scheduled to setup initial fields
+      // - Find higher seed
+      // - Create metafields
+      await inngest.send({
+        name: 'race/scheduled',
+        data: {
+          matchId: msg.match_id,
+        },
+      })
+      break
     default:
       throw Error(`Unknown event: ${msg.event}`)
   }
