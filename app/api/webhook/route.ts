@@ -36,9 +36,6 @@ export async function POST(req: Request) {
       })
       break
     case 'race.scheduled':
-      // TODO: Get race scheduled to setup initial fields
-      // - Find higher seed
-      // - Create metafields
       await inngest.send({
         name: 'race/scheduled',
         data: {

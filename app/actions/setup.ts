@@ -2,6 +2,7 @@
 
 import InertiaAPI from '@/lib/inertia'
 import { PUBLIC_URL } from '@/app/env'
+import { inngest } from '@/inngest/client'
 
 export const confirmParticipation = async (id: string) => {
   const url = `/api/metafields`
@@ -37,6 +38,15 @@ export const sendLoginLink = async (id: string, returnTo: string | null) => {
     method: 'POST',
     payload: {
       msg,
+    },
+  })
+}
+
+export const setupMatch = async (matchId: string) => {
+  await inngest.send({
+    name: 'race/scheduled',
+    data: {
+      matchId: matchId,
     },
   })
 }

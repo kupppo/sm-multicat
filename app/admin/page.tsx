@@ -9,10 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import EditSeedForm from './form'
-import { CheckIcon } from '@radix-ui/react-icons'
+import SetupMatch from './setup'
 
 export default async function AdminPage() {
   const cookieStore = await cookies()
@@ -60,40 +59,14 @@ export default async function AdminPage() {
   return (
     <div className="px-2 pt-6">
       <h1 className="text-3xl mb-4">Admin Page</h1>
-      <h2 className="text-xl">Confirmations</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Confirmed</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {users.map((user: any) => {
-            const confirmed = user.metafields.find((metafield: any) => metafield.key === 'participation')?.value === 'confirmed' || false
-            return (
-              <TableRow key={user.id}>
-                <TableCell className="font-mono">
-                  {user.id}
-                </TableCell>
-                <TableCell>{user.name}</TableCell>
-                <TableCell className="font-mono">{confirmed && <CheckIcon />}</TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-      <div className="my-8">
-        <Separator />
-      </div>
       <h2 className="text-xl">Matches</h2>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">ID</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Schedule Status</TableHead>
+            <TableHead>Match Status</TableHead>
             <TableHead>Higher Seed</TableHead>
           </TableRow>
         </TableHeader>
@@ -102,6 +75,9 @@ export default async function AdminPage() {
             const higherSeed = match.racers.find(
               (r: any) => r.id === match.higherSeed,
             )?.user.name
+            const matchStatus = match.metafields.find(
+              (m: any) => m.key === 'status',
+            )?.value
             return (
               <TableRow key={match.id}>
                 <TableCell className="font-mono">
@@ -109,6 +85,13 @@ export default async function AdminPage() {
                 </TableCell>
                 <TableCell>{match.races[0].name}</TableCell>
                 <TableCell className="font-mono">{match.status}</TableCell>
+                <TableCell>
+                  {matchStatus ? (
+                    <span className="font-mono">{matchStatus}</span>
+                  ) : (
+                    <SetupMatch id={match.id} />
+                  )}
+                </TableCell>
                 <TableCell className="font-mono">
                   <EditSeedForm
                     name={higherSeed}

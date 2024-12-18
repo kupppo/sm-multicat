@@ -15,7 +15,6 @@ export default function EditSeedForm({ matchId, name, racers }: any) {
   }
   return (
     <div>
-      <label htmlFor="seed">Seed</label>
       <Select onValueChange={handleSubmit}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder={name || <>&mdash;</>} />

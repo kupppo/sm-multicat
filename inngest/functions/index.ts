@@ -192,6 +192,57 @@ export const handleRaceStart = inngest.createFunction(
   },
 )
 
+export const handleRaceScheduled = inngest.createFunction(
+  { id: 'handle-race-scheduled' },
+  { event: 'race/scheduled' },
+  async ({ event, step }) => {
+    const data = event.data as RaceEventData
+    await step.run('setup-match', async () => {
+      const match = await InertiaAPI(`/api/matches/${data.matchId}`, {
+        method: 'GET',
+      })
+      if (!match) {
+        throw new NonRetriableError('Match not found')
+      }
+
+      const statusMetafield = match.metafields.find(
+        (metafield: any) => metafield.key === 'status',
+      )
+
+      if (!statusMetafield) {
+        await InertiaAPI('/api/metafields', {
+          method: 'POST',
+          payload: {
+            key: 'status',
+            value: 'AWAITING_PLAYER_ASSIGNMENT',
+            model: 'match',
+            modelId: data.matchId,
+          },
+        })
+      }
+
+      const higherSeedMetafield = match.metafields.find(
+        (metafield: any) => metafield.key === 'higher_seed',
+      )
+      if (!higherSeedMetafield) {
+        const racers = match.racers
+        const higherSeed = racers.sort(
+          (a: any, b: any) => parseInt(a.intialSeed) - parseInt(b.intialSeed),
+        )[0]
+        await InertiaAPI('/api/metafields', {
+          method: 'POST',
+          payload: {
+            key: 'higher_seed',
+            value: higherSeed.id,
+            model: 'match',
+            modelId: data.matchId,
+          },
+        })
+      }
+    })
+  },
+)
+
 export const handleModeSelection = inngest.createFunction(
   { id: 'handle-mode-selection' },
   { event: 'race/mode.select' },
