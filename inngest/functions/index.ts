@@ -228,7 +228,7 @@ export const handleRaceScheduled = inngest.createFunction(
       if (!higherSeedMetafield) {
         const racers = match.racers
         const higherSeed = racers.sort(
-          (a: any, b: any) => parseInt(a.intialSeed) - parseInt(b.intialSeed),
+          (a: any, b: any) => parseInt(a.initialSeed) - parseInt(b.initialSeed),
         )[0]
         await InertiaAPI('/api/metafields', {
           method: 'POST',
